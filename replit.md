@@ -2,11 +2,19 @@
 
 ## Overview
 
-This is a full-stack web application for managing Pakistan's Federal Board of Revenue (FBR) Point of Sale (POS) integration. The system allows businesses to configure store settings, generate invoices, send them to FBR servers, and track the communication logs. It's built with a modern tech stack featuring React frontend, Express backend, and PostgreSQL database.
+This is a comprehensive Perfex CRM plugin for Pakistan's Federal Board of Revenue (FBR) Point of Sale (POS) integration. The system enables businesses to comply with FBR requirements through real-time sales reporting, automatic fiscal invoice generation, and tax compliance. The plugin includes PCT codes support and is delivered as a downloadable package for installation in Perfex CRM.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+
+## Recent Changes
+
+- **January 15, 2025**: Successfully resolved database table deletion issue during module activation
+- **Fixed**: Module activation hook was dropping existing tables, causing manually created tables to be deleted
+- **Solution**: Modified activation process to check table existence before creation and removed table-dropping logic
+- **Result**: Module now activates successfully without destroying existing data
+- **Package**: `fbr_pos_integration_FIXED_v1.0.5.tar.gz` contains the corrected module
 
 ## System Architecture
 
