@@ -9,6 +9,7 @@ class Fbr_pos_integration extends AdminController
         parent::__construct();
         $this->load->model('fbr_pos_integration_model');
         $this->load->library('fbr_pos_integration/Fbr_api');
+        $this->load->library('form_validation');
     }
 
     /**
