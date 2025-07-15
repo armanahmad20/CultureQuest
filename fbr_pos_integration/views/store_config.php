@@ -338,10 +338,27 @@ $('#store-config-form').on('submit', function(e) {
             try {
                 const result = JSON.parse(response);
                 if (result.success) {
+                    let message = 'Store configuration saved successfully!';
+                    if (result.debug) {
+                        message += '\n\nDEBUG INFO:\n';
+                        message += 'Operation: ' + result.debug.operation + '\n';
+                        message += 'Result: ' + result.debug.result + '\n';
+                        message += 'Configs before: ' + result.debug.configs_before + '\n';
+                        message += 'Configs after: ' + result.debug.configs_after + '\n';
+                    }
+                    alert(message);
                     showNotification('Store configuration saved successfully!', 'success');
                     $('#storeConfigModal').modal('hide');
                     location.reload();
                 } else {
+                    let message = 'Error: ' + result.message;
+                    if (result.debug) {
+                        message += '\n\nDEBUG INFO:\n';
+                        message += 'Operation: ' + result.debug.operation + '\n';
+                        message += 'Result: ' + result.debug.result + '\n';
+                        message += 'Error: ' + result.debug.error + '\n';
+                    }
+                    alert(message);
                     showNotification('Error: ' + result.message, 'error');
                 }
             } catch (e) {

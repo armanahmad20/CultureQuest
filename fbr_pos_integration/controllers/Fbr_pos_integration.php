@@ -234,13 +234,29 @@ class Fbr_pos_integration extends AdminController
             log_message('debug', 'FBR: Total configs after save: ' . count($configs));
 
             if ($result) {
-                echo json_encode(['success' => true, 'message' => $message, 'debug' => 'Total configs: ' . count($configs)]);
+                // Get fresh count after save
+                $final_count = $this->fbr_pos_integration_model->get_store_configs();
+                $debug_info = [
+                    'operation' => $config_id ? 'update' : 'create',
+                    'result' => 'SUCCESS',
+                    'configs_before' => count($configs),
+                    'configs_after' => count($final_count),
+                    'data_saved' => $data
+                ];
+                echo json_encode(['success' => true, 'message' => $message, 'debug' => $debug_info]);
             } else {
                 $db_error = $this->db->error();
                 $error_msg = 'Database error: ' . $db_error['message'];
                 error_log('FBR DEBUG: Database error: ' . $error_msg);
                 log_message('error', 'FBR: Database error: ' . $error_msg);
-                echo json_encode(['success' => false, 'message' => $error_msg]);
+                
+                $debug_info = [
+                    'operation' => $config_id ? 'update' : 'create',
+                    'result' => 'FAILED',
+                    'error' => $error_msg,
+                    'data_attempted' => $data
+                ];
+                echo json_encode(['success' => false, 'message' => $error_msg, 'debug' => $debug_info]);
             }
         } catch (Exception $e) {
             error_log('FBR DEBUG: Exception in save_store_config: ' . $e->getMessage());
