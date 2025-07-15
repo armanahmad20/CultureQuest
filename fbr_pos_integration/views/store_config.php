@@ -17,6 +17,9 @@
                         
                         <div class="row">
                             <div class="col-md-12">
+                                <button type="button" class="btn btn-warning" onclick="testDbConnection()">
+                                    <i class="fa fa-database"></i> Test Database
+                                </button>
                                 <button type="button" class="btn btn-info" data-toggle="modal" data-target="#storeConfigModal">
                                     <i class="fa fa-plus"></i> Add New Store Configuration
                                 </button>
@@ -278,6 +281,38 @@ function activateStoreConfig(id) {
 
 function deleteStoreConfig(id) {
     StoreConfigManager.delete(id);
+}
+
+function testDbConnection() {
+    $.ajax({
+        url: admin_url + 'fbr_pos_integration/test_db_connection',
+        type: 'POST',
+        success: function(response) {
+            try {
+                const result = JSON.parse(response);
+                if (result.success) {
+                    let message = 'Database Test Results:\n\n';
+                    message += 'Table exists: ' + (result.table_exists ? 'YES' : 'NO') + '\n';
+                    message += 'Record count: ' + result.record_count + '\n';
+                    message += 'Configs found: ' + result.configs_found + '\n';
+                    if (result.configs && result.configs.length > 0) {
+                        message += '\nConfigurations:\n';
+                        result.configs.forEach(function(config, index) {
+                            message += (index + 1) + '. ' + config.store_name + ' (ID: ' + config.id + ')\n';
+                        });
+                    }
+                    alert(message);
+                } else {
+                    alert('Database test failed: ' + result.message);
+                }
+            } catch (e) {
+                alert('Error parsing database test response');
+            }
+        },
+        error: function(xhr, status, error) {
+            alert('Error testing database connection: ' + error);
+        }
+    });
 }
 
 // Form validation and submission

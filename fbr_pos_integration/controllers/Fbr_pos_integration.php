@@ -212,23 +212,69 @@ class Fbr_pos_integration extends AdminController
         $config_id = $this->input->post('config_id');
         
         try {
+            // Debug: Log the data being saved
+            log_message('debug', 'FBR: Attempting to save config data: ' . json_encode($data));
+            
             if ($config_id) {
                 $result = $this->fbr_pos_integration_model->update_store_config($config_id, $data);
                 $message = 'Store configuration updated successfully';
+                log_message('debug', 'FBR: Update result: ' . ($result ? 'SUCCESS' : 'FAILED'));
             } else {
                 $result = $this->fbr_pos_integration_model->create_store_config($data);
                 $message = 'Store configuration created successfully';
+                log_message('debug', 'FBR: Create result: ' . ($result ? 'SUCCESS' : 'FAILED'));
             }
 
+            // Debug: Check if data was actually saved
+            $configs = $this->fbr_pos_integration_model->get_store_configs();
+            log_message('debug', 'FBR: Total configs after save: ' . count($configs));
+
             if ($result) {
-                echo json_encode(['success' => true, 'message' => $message]);
+                echo json_encode(['success' => true, 'message' => $message, 'debug' => 'Total configs: ' . count($configs)]);
             } else {
                 $db_error = $this->db->error();
                 $error_msg = 'Database error: ' . $db_error['message'];
+                log_message('error', 'FBR: Database error: ' . $error_msg);
                 echo json_encode(['success' => false, 'message' => $error_msg]);
             }
         } catch (Exception $e) {
+            log_message('error', 'FBR: Exception in save_store_config: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Exception: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * AJAX: Test database connection
+     */
+    public function test_db_connection()
+    {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+
+        try {
+            // Test if table exists
+            $table_exists = $this->db->table_exists('tblfbr_store_configs');
+            
+            // Count existing records
+            $count = $this->db->count_all('tblfbr_store_configs');
+            
+            // Get all configs
+            $configs = $this->fbr_pos_integration_model->get_store_configs();
+            
+            echo json_encode([
+                'success' => true,
+                'table_exists' => $table_exists,
+                'record_count' => $count,
+                'configs_found' => count($configs),
+                'configs' => $configs
+            ]);
+            
+        } catch (Exception $e) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Database test failed: ' . $e->getMessage()
+            ]);
         }
     }
 

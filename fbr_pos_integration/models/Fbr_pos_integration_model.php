@@ -71,7 +71,36 @@ class Fbr_pos_integration_model extends App_Model
         }
         
         $data['created_at'] = date('Y-m-d H:i:s');
-        return $this->db->insert('tblfbr_store_configs', $data);
+        
+        // Debug: Check if table exists
+        if (!$this->db->table_exists('tblfbr_store_configs')) {
+            log_message('error', 'FBR: Table tblfbr_store_configs does not exist!');
+            return false;
+        }
+        
+        // Debug: Log the SQL being executed
+        log_message('debug', 'FBR: Creating store config with data: ' . json_encode($data));
+        
+        $result = $this->db->insert('tblfbr_store_configs', $data);
+        
+        // Debug: Log the result and any errors
+        if ($result) {
+            $insert_id = $this->db->insert_id();
+            log_message('debug', 'FBR: Insert successful, ID: ' . $insert_id);
+            
+            // Verify the data was actually saved
+            $saved_config = $this->db->where('id', $insert_id)->get('tblfbr_store_configs')->row();
+            if ($saved_config) {
+                log_message('debug', 'FBR: Data verified in DB: ' . json_encode($saved_config));
+            } else {
+                log_message('error', 'FBR: Data not found in DB after insert!');
+            }
+        } else {
+            $error = $this->db->error();
+            log_message('error', 'FBR: Insert failed: ' . $error['message']);
+        }
+        
+        return $result;
     }
 
     /**
