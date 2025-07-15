@@ -38,15 +38,32 @@ function fbr_pos_activation_hook()
     $CI = &get_instance();
     $CI->load->dbforge();
     
-    // Drop existing tables if they exist (for clean reinstall)
-    if ($CI->db->table_exists(db_prefix() . 'fbr_store_configs')) {
-        $CI->dbforge->drop_table(db_prefix() . 'fbr_store_configs');
-    }
-    if ($CI->db->table_exists(db_prefix() . 'fbr_invoice_logs')) {
-        $CI->dbforge->drop_table(db_prefix() . 'fbr_invoice_logs');
-    }
-    if ($CI->db->table_exists(db_prefix() . 'fbr_pct_codes')) {
-        $CI->dbforge->drop_table(db_prefix() . 'fbr_pct_codes');
+    // Define table names without prefix
+    $table_names = [
+        'fbr_store_configs',
+        'fbr_invoice_logs', 
+        'fbr_pct_codes'
+    ];
+    
+    // Drop existing tables if they exist (all possible variations)
+    foreach ($table_names as $table_name) {
+        // Standard prefixed table name
+        $prefixed_table = db_prefix() . $table_name;
+        if ($CI->db->table_exists($prefixed_table)) {
+            $CI->dbforge->drop_table($prefixed_table);
+        }
+        
+        // Double-prefixed table name (in case of prefix bug)
+        $double_prefixed = 'tbl' . $prefixed_table;
+        if ($CI->db->table_exists($double_prefixed)) {
+            $CI->dbforge->drop_table($double_prefixed);
+        }
+        
+        // Raw table name with manual prefix
+        $manual_prefixed = 'tbl' . $table_name;
+        if ($CI->db->table_exists($manual_prefixed)) {
+            $CI->dbforge->drop_table($manual_prefixed);
+        }
     }
     
     // Create FBR store configurations table
@@ -113,7 +130,7 @@ function fbr_pos_activation_hook()
         ]);
         $CI->dbforge->add_key('id', TRUE);
         $CI->dbforge->add_key('store_id');
-        $CI->dbforge->create_table(db_prefix() . 'fbr_store_configs');
+        $CI->dbforge->create_table(db_prefix() . 'fbr_store_configs', TRUE);
     }
     
     // Create FBR invoice logs table
@@ -169,7 +186,7 @@ function fbr_pos_activation_hook()
         ]);
         $CI->dbforge->add_key('id', TRUE);
         $CI->dbforge->add_key('invoice_id');
-        $CI->dbforge->create_table(db_prefix() . 'fbr_invoice_logs');
+        $CI->dbforge->create_table(db_prefix() . 'fbr_invoice_logs', TRUE);
     }
     
     // Create PCT codes table
@@ -207,7 +224,7 @@ function fbr_pos_activation_hook()
         ]);
         $CI->dbforge->add_key('id', TRUE);
         $CI->dbforge->add_key('pct_code');
-        $CI->dbforge->create_table(db_prefix() . 'fbr_pct_codes');
+        $CI->dbforge->create_table(db_prefix() . 'fbr_pct_codes', TRUE);
     }
     
     // Add FBR fields to items table
