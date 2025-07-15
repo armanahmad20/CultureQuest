@@ -73,11 +73,11 @@ class Fbr_pos_integration_model extends App_Model
     {
         // If setting as active, deactivate others
         if (isset($data['is_active']) && $data['is_active'] == 1) {
-            $this->db->update(db_prefix() . 'fbr_store_configs', ['is_active' => 0]);
+            $this->db->update('tbltblfbr_store_configs', ['is_active' => 0]);
         }
         
         $data['updated_at'] = date('Y-m-d H:i:s');
-        return $this->db->where('id', $id)->update(db_prefix() . 'fbr_store_configs', $data);
+        return $this->db->where('id', $id)->update('tbltblfbr_store_configs', $data);
     }
 
     /**
@@ -85,7 +85,7 @@ class Fbr_pos_integration_model extends App_Model
      */
     public function delete_store_config($id)
     {
-        return $this->db->where('id', $id)->delete(db_prefix() . 'fbr_store_configs');
+        return $this->db->where('id', $id)->delete('tbltblfbr_store_configs');
     }
 
     /**
@@ -93,7 +93,7 @@ class Fbr_pos_integration_model extends App_Model
      */
     public function get_pct_codes()
     {
-        return $this->db->order_by('pct_code', 'ASC')->get(db_prefix() . 'fbr_pct_codes')->result();
+        return $this->db->order_by('pct_code', 'ASC')->get('tbltblfbr_pct_codes')->result();
     }
 
     /**
@@ -101,7 +101,7 @@ class Fbr_pos_integration_model extends App_Model
      */
     public function get_active_pct_codes()
     {
-        return $this->db->where('is_active', 1)->order_by('pct_code', 'ASC')->get(db_prefix() . 'fbr_pct_codes')->result();
+        return $this->db->where('is_active', 1)->order_by('pct_code', 'ASC')->get('tbltblfbr_pct_codes')->result();
     }
 
     /**
@@ -110,7 +110,7 @@ class Fbr_pos_integration_model extends App_Model
     public function create_pct_code($data)
     {
         $data['created_at'] = date('Y-m-d H:i:s');
-        return $this->db->insert(db_prefix() . 'fbr_pct_codes', $data);
+        return $this->db->insert('tbltblfbr_pct_codes', $data);
     }
 
     /**
@@ -118,7 +118,7 @@ class Fbr_pos_integration_model extends App_Model
      */
     public function update_pct_code($id, $data)
     {
-        return $this->db->where('id', $id)->update(db_prefix() . 'fbr_pct_codes', $data);
+        return $this->db->where('id', $id)->update('tbltblfbr_pct_codes', $data);
     }
 
     /**
@@ -126,7 +126,7 @@ class Fbr_pos_integration_model extends App_Model
      */
     public function delete_pct_code($id)
     {
-        return $this->db->where('id', $id)->delete(db_prefix() . 'fbr_pct_codes');
+        return $this->db->where('id', $id)->delete('tbltblfbr_pct_codes');
     }
 
     /**
@@ -134,7 +134,7 @@ class Fbr_pos_integration_model extends App_Model
      */
     public function get_pct_code_by_code($pct_code)
     {
-        return $this->db->where('pct_code', $pct_code)->get(db_prefix() . 'fbr_pct_codes')->row();
+        return $this->db->where('pct_code', $pct_code)->get('tbltblfbr_pct_codes')->row();
     }
 
     /**
@@ -142,7 +142,7 @@ class Fbr_pos_integration_model extends App_Model
      */
     public function get_logs($limit = 100)
     {
-        return $this->db->limit($limit)->order_by('created_at', 'DESC')->get(db_prefix() . 'fbr_invoice_logs')->result();
+        return $this->db->limit($limit)->order_by('created_at', 'DESC')->get('tbltblfbr_invoice_logs')->result();
     }
 
     /**
@@ -150,7 +150,7 @@ class Fbr_pos_integration_model extends App_Model
      */
     public function get_recent_logs($limit = 10)
     {
-        return $this->db->limit($limit)->order_by('created_at', 'DESC')->get(db_prefix() . 'fbr_invoice_logs')->result();
+        return $this->db->limit($limit)->order_by('created_at', 'DESC')->get('tbltblfbr_invoice_logs')->result();
     }
 
     /**
@@ -158,7 +158,7 @@ class Fbr_pos_integration_model extends App_Model
      */
     public function get_logs_by_invoice($invoice_id)
     {
-        return $this->db->where('invoice_id', $invoice_id)->order_by('created_at', 'DESC')->get(db_prefix() . 'fbr_invoice_logs')->result();
+        return $this->db->where('invoice_id', $invoice_id)->order_by('created_at', 'DESC')->get('tbltblfbr_invoice_logs')->result();
     }
 
     /**
@@ -167,7 +167,7 @@ class Fbr_pos_integration_model extends App_Model
     public function create_log($data)
     {
         $data['created_at'] = date('Y-m-d H:i:s');
-        return $this->db->insert(db_prefix() . 'fbr_invoice_logs', $data);
+        return $this->db->insert('tbltblfbr_invoice_logs', $data);
     }
 
     /**
@@ -222,7 +222,7 @@ class Fbr_pos_integration_model extends App_Model
         $this->db->select('ii.*, i.description as item_description, i.pct_code, pct.tax_rate');
         $this->db->from(db_prefix() . 'invoiceitems ii');
         $this->db->join(db_prefix() . 'items i', 'i.id = ii.rel_id', 'left');
-        $this->db->join(db_prefix() . 'fbr_pct_codes pct', 'pct.pct_code = i.pct_code', 'left');
+        $this->db->join('tbltblfbr_pct_codes pct', 'pct.pct_code = i.pct_code', 'left');
         $this->db->where('ii.invoiceid', $invoice_id);
         return $this->db->get()->result();
     }
@@ -256,7 +256,7 @@ class Fbr_pos_integration_model extends App_Model
         $this->db->select('pct.pct_code, pct.description, pct.tax_rate, COUNT(ii.id) as item_count, SUM(ii.total) as total_amount');
         $this->db->from(db_prefix() . 'invoiceitems ii');
         $this->db->join(db_prefix() . 'items i', 'i.id = ii.rel_id', 'left');
-        $this->db->join(db_prefix() . 'fbr_pct_codes pct', 'pct.pct_code = i.pct_code', 'left');
+        $this->db->join('tbltblfbr_pct_codes pct', 'pct.pct_code = i.pct_code', 'left');
         $this->db->join(db_prefix() . 'invoices inv', 'inv.id = ii.invoiceid', 'left');
         $this->db->where('inv.fbr_status', 'confirmed');
         
