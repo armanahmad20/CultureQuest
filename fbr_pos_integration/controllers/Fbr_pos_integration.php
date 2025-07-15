@@ -357,27 +357,50 @@ class Fbr_pos_integration extends AdminController
             $this->db->query('DROP TABLE IF EXISTS `tbltblfbr_invoice_logs`');
             $this->db->query('DROP TABLE IF EXISTS `tbltblfbr_pct_codes`');
             
-            // Create correct tables
-            $this->db->query("CREATE TABLE IF NOT EXISTS `tblfbr_store_configs` (
-                `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-                `store_name` varchar(255) NOT NULL,
-                `store_id` varchar(50) NOT NULL,
-                `ntn` varchar(15) NOT NULL,
-                `strn` varchar(15) NOT NULL,
-                `address` text NOT NULL,
-                `pos_type` varchar(100) NOT NULL,
-                `pos_version` varchar(20) NOT NULL,
-                `ip_address` varchar(45) NOT NULL,
-                `sdc_url` varchar(255) DEFAULT 'http://localhost:8080',
-                `sdc_username` varchar(100) DEFAULT NULL,
-                `sdc_password` varchar(100) DEFAULT NULL,
-                `is_active` tinyint(1) DEFAULT 1,
-                `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                `updated_at` datetime DEFAULT NULL,
-                PRIMARY KEY (`id`),
-                UNIQUE KEY `unique_store_id` (`store_id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+            // Check if correct table exists and update schema if needed
+            if ($this->db->table_exists('tblfbr_store_configs')) {
+                // Check and add missing columns one by one
+                $fields = $this->db->list_fields('tblfbr_store_configs');
+                
+                if (!in_array('sdc_url', $fields)) {
+                    $this->db->query("ALTER TABLE `tblfbr_store_configs` ADD COLUMN `sdc_url` varchar(255) DEFAULT 'http://localhost:8080' AFTER `ip_address`");
+                }
+                
+                if (!in_array('sdc_username', $fields)) {
+                    $this->db->query("ALTER TABLE `tblfbr_store_configs` ADD COLUMN `sdc_username` varchar(100) DEFAULT NULL AFTER `sdc_url`");
+                }
+                
+                if (!in_array('sdc_password', $fields)) {
+                    $this->db->query("ALTER TABLE `tblfbr_store_configs` ADD COLUMN `sdc_password` varchar(100) DEFAULT NULL AFTER `sdc_username`");
+                }
+                
+                if (!in_array('updated_at', $fields)) {
+                    $this->db->query("ALTER TABLE `tblfbr_store_configs` ADD COLUMN `updated_at` datetime DEFAULT NULL AFTER `created_at`");
+                }
+            } else {
+                // Create new table with complete schema
+                $this->db->query("CREATE TABLE `tblfbr_store_configs` (
+                    `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+                    `store_name` varchar(255) NOT NULL,
+                    `store_id` varchar(50) NOT NULL,
+                    `ntn` varchar(15) NOT NULL,
+                    `strn` varchar(15) NOT NULL,
+                    `address` text NOT NULL,
+                    `pos_type` varchar(100) NOT NULL,
+                    `pos_version` varchar(20) NOT NULL,
+                    `ip_address` varchar(45) NOT NULL,
+                    `sdc_url` varchar(255) DEFAULT 'http://localhost:8080',
+                    `sdc_username` varchar(100) DEFAULT NULL,
+                    `sdc_password` varchar(100) DEFAULT NULL,
+                    `is_active` tinyint(1) DEFAULT 1,
+                    `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    `updated_at` datetime DEFAULT NULL,
+                    PRIMARY KEY (`id`),
+                    UNIQUE KEY `unique_store_id` (`store_id`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+            }
             
+            // Create other tables
             $this->db->query("CREATE TABLE IF NOT EXISTS `tblfbr_invoice_logs` (
                 `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
                 `invoice_id` int(11) NOT NULL,
@@ -404,9 +427,23 @@ class Fbr_pos_integration extends AdminController
                 UNIQUE KEY `unique_pct_code` (`pct_code`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
             
-            // Insert default data
-            $this->db->query("INSERT IGNORE INTO `tblfbr_store_configs` (`store_name`, `store_id`, `ntn`, `strn`, `address`, `pos_type`, `pos_version`, `ip_address`, `sdc_url`, `is_active`, `created_at`) 
-                VALUES ('Default Store', 'STORE001', '0000000000000', 'STRN000000', 'Default Address, Pakistan', 'Perfex CRM', '1.0.0', '127.0.0.1', 'http://localhost:8080', 1, NOW())");
+            // Insert default data if table is empty
+            $count = $this->db->count_all('tblfbr_store_configs');
+            if ($count == 0) {
+                $this->db->query("INSERT INTO `tblfbr_store_configs` (`store_name`, `store_id`, `ntn`, `strn`, `address`, `pos_type`, `pos_version`, `ip_address`, `sdc_url`, `is_active`, `created_at`) 
+                    VALUES ('Default Store', 'STORE001', '0000000000000', 'STRN000000', 'Default Address, Pakistan', 'Perfex CRM', '1.0.0', '127.0.0.1', 'http://localhost:8080', 1, NOW())");
+            }
+            
+            // Insert sample PCT codes
+            $pct_count = $this->db->count_all('tblfbr_pct_codes');
+            if ($pct_count == 0) {
+                $this->db->query("INSERT INTO `tblfbr_pct_codes` (`pct_code`, `description`, `tax_rate`, `is_active`, `created_at`) VALUES 
+                    ('01111000', 'Food and Beverages', 17.00, 1, NOW()),
+                    ('02111000', 'Clothing and Textiles', 17.00, 1, NOW()),
+                    ('03111000', 'Electronics and Appliances', 17.00, 1, NOW()),
+                    ('04111000', 'Pharmaceuticals and Health', 0.00, 1, NOW()),
+                    ('05111000', 'Automotive and Parts', 17.00, 1, NOW())");
+            }
             
             return 'Database schema fix applied successfully';
             
