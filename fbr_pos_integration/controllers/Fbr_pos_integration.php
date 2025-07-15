@@ -211,18 +211,24 @@ class Fbr_pos_integration extends AdminController
 
         $config_id = $this->input->post('config_id');
         
-        if ($config_id) {
-            $result = $this->fbr_pos_integration_model->update_store_config($config_id, $data);
-            $message = 'Store configuration updated successfully';
-        } else {
-            $result = $this->fbr_pos_integration_model->create_store_config($data);
-            $message = 'Store configuration created successfully';
-        }
+        try {
+            if ($config_id) {
+                $result = $this->fbr_pos_integration_model->update_store_config($config_id, $data);
+                $message = 'Store configuration updated successfully';
+            } else {
+                $result = $this->fbr_pos_integration_model->create_store_config($data);
+                $message = 'Store configuration created successfully';
+            }
 
-        if ($result) {
-            echo json_encode(['success' => true, 'message' => $message]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Failed to save store configuration']);
+            if ($result) {
+                echo json_encode(['success' => true, 'message' => $message]);
+            } else {
+                $db_error = $this->db->error();
+                $error_msg = 'Database error: ' . $db_error['message'];
+                echo json_encode(['success' => false, 'message' => $error_msg]);
+            }
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Exception: ' . $e->getMessage()]);
         }
     }
 
