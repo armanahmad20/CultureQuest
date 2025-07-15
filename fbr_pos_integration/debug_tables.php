@@ -1,147 +1,135 @@
 <?php
-// Debug script to check table existence and fix naming issues
-// Place this in your Perfex CRM root directory and run it via browser
+// Debug script to check what tables exist and what the system is looking for
+// Upload this to your Perfex CRM root and run it in browser
 
-defined('BASEPATH') or exit('No direct script access allowed');
+echo "<h2>FBR Database Debug Information</h2>";
 
-// Load CodeIgniter
-$CI = &get_instance();
-$CI->load->dbforge();
+// Database connection
+$config = include(APPPATH . 'config/database.php');
+$db = $config['default'];
 
-echo "<h2>FBR POS Integration - Table Debug</h2>";
+echo "<p><strong>Database:</strong> " . $db['database'] . "</p>";
+echo "<p><strong>Prefix:</strong> " . $db['dbprefix'] . "</p>";
 
-// Check what db_prefix() returns
-echo "<p><strong>Database prefix:</strong> " . db_prefix() . "</p>";
+// Connect to database
+$mysqli = new mysqli($db['hostname'], $db['username'], $db['password'], $db['database']);
 
-// Expected table names
-$expected_tables = [
-    'fbr_store_configs',
-    'fbr_invoice_logs',
-    'fbr_pct_codes'
-];
-
-echo "<h3>Expected vs Actual Tables:</h3>";
-foreach ($expected_tables as $table) {
-    $prefixed_name = db_prefix() . $table;
-    echo "<p>";
-    echo "<strong>Expected:</strong> {$prefixed_name} - ";
-    echo "<strong>Exists:</strong> " . ($CI->db->table_exists($prefixed_name) ? "YES" : "NO");
-    echo "</p>";
+if ($mysqli->connect_error) {
+    die("Connection failed: " . $mysqli->connect_error);
 }
 
-// Check all tables that might contain 'fbr'
-echo "<h3>All FBR-related tables in database:</h3>";
-$tables = $CI->db->list_tables();
-foreach ($tables as $table) {
+echo "<h3>All Tables in Database:</h3>";
+$result = $mysqli->query("SHOW TABLES");
+while ($row = $result->fetch_array()) {
+    $table = $row[0];
     if (strpos($table, 'fbr') !== false) {
-        echo "<p>Found: {$table}</p>";
+        echo "<p style='color: green;'><strong>FBR Table:</strong> " . $table . "</p>";
+    } else {
+        echo "<p>" . $table . "</p>";
     }
 }
 
-// Try to create the tables manually
-echo "<h3>Manual Table Creation Test:</h3>";
+echo "<h3>Create Missing Tables SQL:</h3>";
+echo "<textarea style='width: 100%; height: 300px; font-family: monospace;'>";
+echo "-- Run this SQL in your database\n";
+echo "CREATE TABLE IF NOT EXISTS tblfbr_pct_codes (\n";
+echo "  id int(11) unsigned NOT NULL AUTO_INCREMENT,\n";
+echo "  pct_code varchar(20) NOT NULL,\n";
+echo "  description text NOT NULL,\n";
+echo "  tax_rate decimal(5,2) DEFAULT 17.00,\n";
+echo "  is_active tinyint(1) DEFAULT 1,\n";
+echo "  created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n";
+echo "  PRIMARY KEY (id)\n";
+echo ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;\n\n";
 
-// Drop any existing variations
-$drop_variations = [
-    'fbr_store_configs',
-    'tblfbr_store_configs',
-    'tbltblfbr_store_configs',
-    'tbltbltblfbr_store_configs'
-];
+echo "CREATE TABLE IF NOT EXISTS tbltblfbr_pct_codes (\n";
+echo "  id int(11) unsigned NOT NULL AUTO_INCREMENT,\n";
+echo "  pct_code varchar(20) NOT NULL,\n";
+echo "  description text NOT NULL,\n";
+echo "  tax_rate decimal(5,2) DEFAULT 17.00,\n";
+echo "  is_active tinyint(1) DEFAULT 1,\n";
+echo "  created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n";
+echo "  PRIMARY KEY (id)\n";
+echo ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;\n\n";
 
-foreach ($drop_variations as $table) {
-    if ($CI->db->table_exists($table)) {
-        $CI->dbforge->drop_table($table);
-        echo "<p>Dropped: {$table}</p>";
-    }
-}
+echo "CREATE TABLE IF NOT EXISTS tblfbr_store_configs (\n";
+echo "  id int(11) unsigned NOT NULL AUTO_INCREMENT,\n";
+echo "  store_name varchar(255) NOT NULL,\n";
+echo "  store_id varchar(50) NOT NULL,\n";
+echo "  ntn varchar(15) NOT NULL,\n";
+echo "  strn varchar(15) NOT NULL,\n";
+echo "  address text NOT NULL,\n";
+echo "  pos_type varchar(100) NOT NULL,\n";
+echo "  pos_version varchar(20) NOT NULL,\n";
+echo "  ip_address varchar(45) NOT NULL,\n";
+echo "  is_active tinyint(1) DEFAULT 1,\n";
+echo "  created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n";
+echo "  updated_at datetime DEFAULT NULL,\n";
+echo "  PRIMARY KEY (id)\n";
+echo ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;\n\n";
 
-// Create the store configs table with correct name
-$CI->dbforge->add_field([
-    'id' => [
-        'type' => 'INT',
-        'constraint' => 11,
-        'unsigned' => TRUE,
-        'auto_increment' => TRUE
-    ],
-    'store_name' => [
-        'type' => 'VARCHAR',
-        'constraint' => 255,
-        'null' => FALSE
-    ],
-    'store_id' => [
-        'type' => 'VARCHAR',
-        'constraint' => 50,
-        'null' => FALSE
-    ],
-    'ntn' => [
-        'type' => 'VARCHAR',
-        'constraint' => 15,
-        'null' => FALSE
-    ],
-    'strn' => [
-        'type' => 'VARCHAR',
-        'constraint' => 15,
-        'null' => FALSE
-    ],
-    'address' => [
-        'type' => 'TEXT',
-        'null' => FALSE
-    ],
-    'pos_type' => [
-        'type' => 'VARCHAR',
-        'constraint' => 100,
-        'null' => FALSE
-    ],
-    'pos_version' => [
-        'type' => 'VARCHAR',
-        'constraint' => 20,
-        'null' => FALSE
-    ],
-    'ip_address' => [
-        'type' => 'VARCHAR',
-        'constraint' => 45,
-        'null' => FALSE
-    ],
-    'is_active' => [
-        'type' => 'TINYINT',
-        'constraint' => 1,
-        'default' => 1
-    ],
-    'created_at' => [
-        'type' => 'DATETIME',
-        'null' => FALSE
-    ],
-    'updated_at' => [
-        'type' => 'DATETIME',
-        'null' => TRUE
-    ]
-]);
+echo "CREATE TABLE IF NOT EXISTS tbltblfbr_store_configs (\n";
+echo "  id int(11) unsigned NOT NULL AUTO_INCREMENT,\n";
+echo "  store_name varchar(255) NOT NULL,\n";
+echo "  store_id varchar(50) NOT NULL,\n";
+echo "  ntn varchar(15) NOT NULL,\n";
+echo "  strn varchar(15) NOT NULL,\n";
+echo "  address text NOT NULL,\n";
+echo "  pos_type varchar(100) NOT NULL,\n";
+echo "  pos_version varchar(20) NOT NULL,\n";
+echo "  ip_address varchar(45) NOT NULL,\n";
+echo "  is_active tinyint(1) DEFAULT 1,\n";
+echo "  created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n";
+echo "  updated_at datetime DEFAULT NULL,\n";
+echo "  PRIMARY KEY (id)\n";
+echo ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;\n\n";
 
-$CI->dbforge->add_key('id', TRUE);
-$CI->dbforge->add_key('store_id');
+echo "CREATE TABLE IF NOT EXISTS tblfbr_invoice_logs (\n";
+echo "  id int(11) unsigned NOT NULL AUTO_INCREMENT,\n";
+echo "  invoice_id int(11) NOT NULL,\n";
+echo "  store_config_id int(11) NOT NULL,\n";
+echo "  fbr_invoice_number varchar(100) DEFAULT NULL,\n";
+echo "  action varchar(50) NOT NULL,\n";
+echo "  request_data text DEFAULT NULL,\n";
+echo "  response_data text DEFAULT NULL,\n";
+echo "  status varchar(20) NOT NULL,\n";
+echo "  error_message text DEFAULT NULL,\n";
+echo "  created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n";
+echo "  PRIMARY KEY (id)\n";
+echo ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;\n\n";
 
-$table_name = db_prefix() . 'fbr_store_configs';
-if ($CI->dbforge->create_table($table_name, TRUE)) {
-    echo "<p>✓ Successfully created: {$table_name}</p>";
-} else {
-    echo "<p>✗ Failed to create: {$table_name}</p>";
-}
+echo "CREATE TABLE IF NOT EXISTS tbltblfbr_invoice_logs (\n";
+echo "  id int(11) unsigned NOT NULL AUTO_INCREMENT,\n";
+echo "  invoice_id int(11) NOT NULL,\n";
+echo "  store_config_id int(11) NOT NULL,\n";
+echo "  fbr_invoice_number varchar(100) DEFAULT NULL,\n";
+echo "  action varchar(50) NOT NULL,\n";
+echo "  request_data text DEFAULT NULL,\n";
+echo "  response_data text DEFAULT NULL,\n";
+echo "  status varchar(20) NOT NULL,\n";
+echo "  error_message text DEFAULT NULL,\n";
+echo "  created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n";
+echo "  PRIMARY KEY (id)\n";
+echo ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;\n\n";
 
-// Test table access
-echo "<h3>Table Access Test:</h3>";
-try {
-    $count = $CI->db->count_all_results(db_prefix() . 'fbr_store_configs');
-    echo "<p>✓ Successfully accessed table, record count: {$count}</p>";
-} catch (Exception $e) {
-    echo "<p>✗ Error accessing table: " . $e->getMessage() . "</p>";
-}
+echo "-- Insert sample data\n";
+echo "INSERT IGNORE INTO tblfbr_pct_codes (pct_code, description, tax_rate, is_active, created_at) VALUES\n";
+echo "('01111000', 'Food and Beverages', 17.00, 1, NOW()),\n";
+echo "('02111000', 'Clothing and Textiles', 17.00, 1, NOW()),\n";
+echo "('03111000', 'Electronics and Appliances', 17.00, 1, NOW());\n\n";
 
-echo "<hr>";
-echo "<p><strong>Instructions:</strong></p>";
-echo "<ol>";
-echo "<li>Run this script to see what tables exist</li>";
-echo "<li>If tables are created successfully, try activating the module again</li>";
-echo "<li>Delete this file after debugging</li>";
-echo "</ol>";
+echo "INSERT IGNORE INTO tbltblfbr_pct_codes (pct_code, description, tax_rate, is_active, created_at) VALUES\n";
+echo "('01111000', 'Food and Beverages', 17.00, 1, NOW()),\n";
+echo "('02111000', 'Clothing and Textiles', 17.00, 1, NOW()),\n";
+echo "('03111000', 'Electronics and Appliances', 17.00, 1, NOW());\n\n";
+
+echo "INSERT IGNORE INTO tblfbr_store_configs (store_name, store_id, ntn, strn, address, pos_type, pos_version, ip_address, is_active, created_at) VALUES\n";
+echo "('Default Store', 'STORE001', '0000000000000', 'STRN000000', 'Default Address, Pakistan', 'Perfex CRM', '1.0.0', '127.0.0.1', 1, NOW());\n\n";
+
+echo "INSERT IGNORE INTO tbltblfbr_store_configs (store_name, store_id, ntn, strn, address, pos_type, pos_version, ip_address, is_active, created_at) VALUES\n";
+echo "('Default Store', 'STORE001', '0000000000000', 'STRN000000', 'Default Address, Pakistan', 'Perfex CRM', '1.0.0', '127.0.0.1', 1, NOW());\n";
+
+echo "</textarea>";
+
+$mysqli->close();
 ?>
