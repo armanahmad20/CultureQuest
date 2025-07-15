@@ -39,7 +39,9 @@ Store configuration appears to save successfully but doesn't show in the databas
 2. **Enable debug logging in Perfex CRM:**
    - Go to your Perfex CRM root directory
    - Edit `application/config/config.php`
-   - Set: `$config['log_threshold'] = 4;` (to enable debug logging)
+   - Change: `$config['log_threshold'] = (ENVIRONMENT !== 'production' ? 1 : 0);`
+   - To: `$config['log_threshold'] = 4;` (to enable debug logging)
+   - Or temporarily set your ENVIRONMENT to 'development' in `index.php`
 
 ## Testing Steps
 

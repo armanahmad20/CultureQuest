@@ -212,21 +212,25 @@ class Fbr_pos_integration extends AdminController
         $config_id = $this->input->post('config_id');
         
         try {
-            // Debug: Log the data being saved
+            // Debug: Log the data being saved (also write to error log for visibility)
+            error_log('FBR DEBUG: Attempting to save config data: ' . json_encode($data));
             log_message('debug', 'FBR: Attempting to save config data: ' . json_encode($data));
             
             if ($config_id) {
                 $result = $this->fbr_pos_integration_model->update_store_config($config_id, $data);
                 $message = 'Store configuration updated successfully';
+                error_log('FBR DEBUG: Update result: ' . ($result ? 'SUCCESS' : 'FAILED'));
                 log_message('debug', 'FBR: Update result: ' . ($result ? 'SUCCESS' : 'FAILED'));
             } else {
                 $result = $this->fbr_pos_integration_model->create_store_config($data);
                 $message = 'Store configuration created successfully';
+                error_log('FBR DEBUG: Create result: ' . ($result ? 'SUCCESS' : 'FAILED'));
                 log_message('debug', 'FBR: Create result: ' . ($result ? 'SUCCESS' : 'FAILED'));
             }
 
             // Debug: Check if data was actually saved
             $configs = $this->fbr_pos_integration_model->get_store_configs();
+            error_log('FBR DEBUG: Total configs after save: ' . count($configs));
             log_message('debug', 'FBR: Total configs after save: ' . count($configs));
 
             if ($result) {
@@ -234,10 +238,12 @@ class Fbr_pos_integration extends AdminController
             } else {
                 $db_error = $this->db->error();
                 $error_msg = 'Database error: ' . $db_error['message'];
+                error_log('FBR DEBUG: Database error: ' . $error_msg);
                 log_message('error', 'FBR: Database error: ' . $error_msg);
                 echo json_encode(['success' => false, 'message' => $error_msg]);
             }
         } catch (Exception $e) {
+            error_log('FBR DEBUG: Exception in save_store_config: ' . $e->getMessage());
             log_message('error', 'FBR: Exception in save_store_config: ' . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Exception: ' . $e->getMessage()]);
         }
@@ -262,12 +268,19 @@ class Fbr_pos_integration extends AdminController
             // Get all configs
             $configs = $this->fbr_pos_integration_model->get_store_configs();
             
+            // Check environment and logging settings
+            $environment = defined('ENVIRONMENT') ? ENVIRONMENT : 'unknown';
+            $log_threshold = $this->config->item('log_threshold');
+            
             echo json_encode([
                 'success' => true,
                 'table_exists' => $table_exists,
                 'record_count' => $count,
                 'configs_found' => count($configs),
-                'configs' => $configs
+                'configs' => $configs,
+                'environment' => $environment,
+                'log_threshold' => $log_threshold,
+                'debug_enabled' => ($log_threshold >= 4) ? 'YES' : 'NO'
             ]);
             
         } catch (Exception $e) {

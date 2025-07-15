@@ -295,6 +295,9 @@ function testDbConnection() {
                     message += 'Table exists: ' + (result.table_exists ? 'YES' : 'NO') + '\n';
                     message += 'Record count: ' + result.record_count + '\n';
                     message += 'Configs found: ' + result.configs_found + '\n';
+                    message += 'Environment: ' + result.environment + '\n';
+                    message += 'Log threshold: ' + result.log_threshold + '\n';
+                    message += 'Debug enabled: ' + result.debug_enabled + '\n';
                     if (result.configs && result.configs.length > 0) {
                         message += '\nConfigurations:\n';
                         result.configs.forEach(function(config, index) {
