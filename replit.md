@@ -10,6 +10,12 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **January 15, 2025 - Latest**: Fixed CSRF token "419 Page Expired!" error in store configuration
+- **Solution**: Converted form submission to AJAX with proper CSRF token handling and validation
+- **Enhanced**: Added FBR SDC URL configuration support for Windows-only FBR SDC program
+- **Added**: Optional SDC username/password fields for authentication
+- **Package**: `fbr_pos_integration_CSRF_FIX_v1.0.7.tar.gz` contains the complete fix
+
 - **January 15, 2025**: Successfully resolved database table deletion issue during module activation
 - **Fixed**: Module activation hook was dropping existing tables, causing manually created tables to be deleted
 - **Solution**: Modified activation process to check table existence before creation and removed table-dropping logic

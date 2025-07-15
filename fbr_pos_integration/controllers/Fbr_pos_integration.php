@@ -171,6 +171,85 @@ class Fbr_pos_integration extends AdminController
     }
 
     /**
+     * AJAX: Save store config
+     */
+    public function save_store_config()
+    {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+
+        $this->form_validation->set_rules('store_name', 'Store Name', 'required');
+        $this->form_validation->set_rules('store_id', 'Store ID', 'required');
+        $this->form_validation->set_rules('ntn', 'NTN', 'required|exact_length[13]');
+        $this->form_validation->set_rules('strn', 'STRN', 'required');
+        $this->form_validation->set_rules('address', 'Address', 'required');
+
+        if ($this->form_validation->run() == FALSE) {
+            echo json_encode([
+                'success' => false, 
+                'message' => validation_errors()
+            ]);
+            return;
+        }
+
+        $data = [
+            'store_name' => $this->input->post('store_name'),
+            'store_id' => $this->input->post('store_id'),
+            'ntn' => $this->input->post('ntn'),
+            'strn' => $this->input->post('strn'),
+            'address' => $this->input->post('address'),
+            'pos_type' => $this->input->post('pos_type'),
+            'pos_version' => $this->input->post('pos_version'),
+            'ip_address' => $this->input->post('ip_address'),
+            'sdc_url' => $this->input->post('sdc_url'),
+            'sdc_username' => $this->input->post('sdc_username'),
+            'sdc_password' => $this->input->post('sdc_password'),
+            'is_active' => $this->input->post('is_active') ? 1 : 0
+        ];
+
+        $config_id = $this->input->post('config_id');
+        
+        if ($config_id) {
+            $result = $this->fbr_pos_integration_model->update_store_config($config_id, $data);
+            $message = 'Store configuration updated successfully';
+        } else {
+            $result = $this->fbr_pos_integration_model->create_store_config($data);
+            $message = 'Store configuration created successfully';
+        }
+
+        if ($result) {
+            echo json_encode(['success' => true, 'message' => $message]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to save store configuration']);
+        }
+    }
+
+    /**
+     * AJAX: Get store config
+     */
+    public function get_store_config()
+    {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+
+        $config_id = $this->input->post('id');
+        
+        if (!$config_id) {
+            echo json_encode(['success' => false, 'message' => 'Config ID is required']);
+            return;
+        }
+
+        $config = $this->fbr_pos_integration_model->get_store_config($config_id);
+        if ($config) {
+            echo json_encode(['success' => true, 'config' => $config]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Configuration not found']);
+        }
+    }
+
+    /**
      * AJAX: Delete store config
      */
     public function delete_store_config()

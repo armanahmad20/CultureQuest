@@ -53,6 +53,14 @@ class Fbr_pos_integration_model extends App_Model
     }
 
     /**
+     * Get store configuration by ID
+     */
+    public function get_store_config($id)
+    {
+        return $this->db->where('id', $id)->get('tbltblfbr_store_configs')->row();
+    }
+
+    /**
      * Create store configuration
      */
     public function create_store_config($data)

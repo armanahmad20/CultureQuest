@@ -104,6 +104,7 @@
                     <div class="fbr-form-errors"></div>
                     
                     <input type="hidden" name="config_id" id="config_id">
+                    <?php echo form_hidden($this->security->get_csrf_token_name(), $this->security->get_csrf_hash()); ?>
                     
                     <div class="fbr-form-section">
                         <h4>Store Information</h4>
@@ -176,6 +177,37 @@
                         </div>
                     </div>
                     
+                    <div class="fbr-form-section">
+                        <h4>FBR SDC Connection</h4>
+                        <div class="alert alert-info">
+                            <i class="fa fa-info-circle"></i> 
+                            <strong>Note:</strong> FBR SDC runs on Windows machines. Configure the URL to reach your FBR SDC installation.
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="sdc_url">FBR SDC URL <span class="fbr-required-field">*</span></label>
+                            <input type="text" class="form-control" id="sdc_url" name="sdc_url" value="http://localhost:8080" placeholder="http://192.168.1.100:8080">
+                            <small class="fbr-help-text">URL to connect to FBR Sales Data Controller</small>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="sdc_username">SDC Username</label>
+                                    <input type="text" class="form-control" id="sdc_username" name="sdc_username">
+                                    <small class="fbr-help-text">Username for SDC authentication (if required)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="sdc_password">SDC Password</label>
+                                    <input type="password" class="form-control" id="sdc_password" name="sdc_password">
+                                    <small class="fbr-help-text">Password for SDC authentication (if required)</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="form-group">
                         <div class="checkbox">
                             <label>
@@ -218,6 +250,9 @@ function editStoreConfig(id) {
                 $('#pos_type').val(config.pos_type);
                 $('#pos_version').val(config.pos_version);
                 $('#ip_address').val(config.ip_address);
+                $('#sdc_url').val(config.sdc_url || 'http://localhost:8080');
+                $('#sdc_username').val(config.sdc_username || '');
+                $('#sdc_password').val(config.sdc_password || '');
                 $('#is_active').prop('checked', config.is_active == 1);
                 $('#modal-title').text('Edit Store Configuration');
                 $('#storeConfigModal').modal('show');
@@ -245,7 +280,7 @@ function deleteStoreConfig(id) {
     StoreConfigManager.delete(id);
 }
 
-// Form validation
+// Form validation and submission
 $('#store-config-form').on('submit', function(e) {
     e.preventDefault();
     
@@ -254,8 +289,35 @@ $('#store-config-form').on('submit', function(e) {
         return;
     }
     
-    // Submit the form
-    this.submit();
+    // Submit via AJAX with proper CSRF token
+    const formData = $(this).serialize();
+    
+    $.ajax({
+        url: admin_url + 'fbr_pos_integration/save_store_config',
+        type: 'POST',
+        data: formData,
+        success: function(response) {
+            try {
+                const result = JSON.parse(response);
+                if (result.success) {
+                    showNotification('Store configuration saved successfully!', 'success');
+                    $('#storeConfigModal').modal('hide');
+                    location.reload();
+                } else {
+                    showNotification('Error: ' + result.message, 'error');
+                }
+            } catch (e) {
+                showNotification('Error saving store configuration', 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            if (xhr.status === 419) {
+                showNotification('Session expired. Please refresh the page and try again.', 'error');
+            } else {
+                showNotification('Error saving store configuration: ' + error, 'error');
+            }
+        }
+    });
 });
 
 // Reset form when modal is closed
