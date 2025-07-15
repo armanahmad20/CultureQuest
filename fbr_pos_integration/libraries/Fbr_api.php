@@ -207,20 +207,29 @@ class Fbr_api
     }
 
     /**
-     * Make API call to FBR server
+     * Make API call to FBR SDC (Sales Data Controller)
+     * SDC runs on Windows machine at business premises
      */
     private function make_api_call($endpoint, $data = [], $method = 'POST')
     {
-        $url = rtrim($this->server_url, '/') . $endpoint;
+        // FBR SDC typically runs on localhost:8080 or local network IP
+        $sdc_url = $this->store_config->sdc_url ?? 'http://localhost:8080';
+        $url = rtrim($sdc_url, '/') . $endpoint;
         
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-            'Accept: application/json'
+            'Accept: application/json',
+            'User-Agent: Perfex-FBR-POS/1.0'
         ]);
+        
+        // Disable SSL verification for local SDC connections
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         
         if ($method === 'POST') {
             curl_setopt($ch, CURLOPT_POST, true);
@@ -229,22 +238,22 @@ class Fbr_api
         
         $response = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        
-        if (curl_error($ch)) {
-            curl_close($ch);
-            throw new Exception('cURL Error: ' . curl_error($ch));
-        }
+        $curl_error = curl_error($ch);
         
         curl_close($ch);
         
+        if ($curl_error) {
+            throw new Exception('Cannot connect to FBR SDC: ' . $curl_error . '. Ensure FBR SDC is running on the Windows machine.');
+        }
+        
         if ($http_code !== 200) {
-            throw new Exception('HTTP Error: ' . $http_code);
+            throw new Exception('FBR SDC returned error: HTTP ' . $http_code);
         }
         
         $decoded_response = json_decode($response, true);
         
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception('Invalid JSON response from FBR server');
+            throw new Exception('Invalid response from FBR SDC');
         }
         
         return $decoded_response;

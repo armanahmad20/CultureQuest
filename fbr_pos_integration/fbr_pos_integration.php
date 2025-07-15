@@ -101,6 +101,9 @@ function create_fbr_store_configs_table()
         `pos_type` varchar(100) NOT NULL,
         `pos_version` varchar(20) NOT NULL,
         `ip_address` varchar(45) NOT NULL,
+        `sdc_url` varchar(255) DEFAULT 'http://localhost:8080',
+        `sdc_username` varchar(100) DEFAULT NULL,
+        `sdc_password` varchar(100) DEFAULT NULL,
         `is_active` tinyint(1) DEFAULT 1,
         `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
         `updated_at` datetime DEFAULT NULL,
@@ -111,7 +114,7 @@ function create_fbr_store_configs_table()
     $CI->db->query($sql);
     
     // Insert default store config
-    $CI->db->query("INSERT IGNORE INTO `tblfbr_store_configs` (`store_name`, `store_id`, `ntn`, `strn`, `address`, `pos_type`, `pos_version`, `ip_address`, `is_active`, `created_at`) VALUES ('Default Store', 'STORE001', '0000000000000', 'STRN000000', 'Default Address, Pakistan', 'Perfex CRM', '1.0.0', '127.0.0.1', 1, NOW())");
+    $CI->db->query("INSERT IGNORE INTO `tblfbr_store_configs` (`store_name`, `store_id`, `ntn`, `strn`, `address`, `pos_type`, `pos_version`, `ip_address`, `sdc_url`, `is_active`, `created_at`) VALUES ('Default Store', 'STORE001', '0000000000000', 'STRN000000', 'Default Address, Pakistan', 'Perfex CRM', '1.0.0', '127.0.0.1', 'http://localhost:8080', 1, NOW())");
 }
 
 function create_fbr_invoice_logs_table()
