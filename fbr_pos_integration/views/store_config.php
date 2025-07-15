@@ -20,6 +20,9 @@
                                 <button type="button" class="btn btn-warning" onclick="testDbConnection()">
                                     <i class="fa fa-database"></i> Test Database
                                 </button>
+                                <button type="button" class="btn btn-danger" onclick="fixDatabaseSchema()">
+                                    <i class="fa fa-wrench"></i> Fix Database Schema
+                                </button>
                                 <button type="button" class="btn btn-info" data-toggle="modal" data-target="#storeConfigModal">
                                     <i class="fa fa-plus"></i> Add New Store Configuration
                                 </button>
@@ -316,6 +319,42 @@ function testDbConnection() {
             alert('Error testing database connection: ' + error);
         }
     });
+}
+
+function fixDatabaseSchema() {
+    if (confirm('This will fix the database schema by removing incorrectly named tables and creating correct ones. Continue?')) {
+        $.ajax({
+            url: admin_url + 'fbr_pos_integration/fix_database_schema',
+            type: 'POST',
+            success: function(response) {
+                try {
+                    const result = JSON.parse(response);
+                    if (result.success) {
+                        let message = 'Database Schema Fix Results:\n\n';
+                        message += 'Fix result: ' + result.fix_result + '\n';
+                        message += 'Table exists: ' + (result.table_exists ? 'YES' : 'NO') + '\n';
+                        message += 'Record count: ' + result.record_count + '\n';
+                        message += 'Configs found: ' + result.configs_found + '\n';
+                        if (result.configs && result.configs.length > 0) {
+                            message += '\nConfigurations:\n';
+                            result.configs.forEach(function(config, index) {
+                                message += (index + 1) + '. ' + config.store_name + ' (ID: ' + config.id + ')\n';
+                            });
+                        }
+                        alert(message);
+                        location.reload();
+                    } else {
+                        alert('Database schema fix failed: ' + result.message);
+                    }
+                } catch (e) {
+                    alert('Error parsing database schema fix response');
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('Error fixing database schema: ' + error);
+            }
+        });
+    }
 }
 
 // Form validation and submission

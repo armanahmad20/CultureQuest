@@ -308,6 +308,114 @@ class Fbr_pos_integration extends AdminController
     }
 
     /**
+     * AJAX: Fix database schema
+     */
+    public function fix_database_schema()
+    {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+
+        try {
+            // Run database schema fix
+            $fix_result = $this->run_database_schema_fix();
+            
+            // Test if table exists
+            $table_exists = $this->db->table_exists('tblfbr_store_configs');
+            
+            // Count existing records
+            $count = $this->db->count_all('tblfbr_store_configs');
+            
+            // Get all configs
+            $configs = $this->fbr_pos_integration_model->get_store_configs();
+            
+            echo json_encode([
+                'success' => true,
+                'fix_result' => $fix_result,
+                'table_exists' => $table_exists,
+                'record_count' => $count,
+                'configs_found' => count($configs),
+                'configs' => $configs
+            ]);
+            
+        } catch (Exception $e) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Database fix failed: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Run database schema fix
+     */
+    private function run_database_schema_fix()
+    {
+        try {
+            // Drop incorrectly named tables
+            $this->db->query('DROP TABLE IF EXISTS `tbltblfbr_store_configs`');
+            $this->db->query('DROP TABLE IF EXISTS `tbltblfbr_invoice_logs`');
+            $this->db->query('DROP TABLE IF EXISTS `tbltblfbr_pct_codes`');
+            
+            // Create correct tables
+            $this->db->query("CREATE TABLE IF NOT EXISTS `tblfbr_store_configs` (
+                `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+                `store_name` varchar(255) NOT NULL,
+                `store_id` varchar(50) NOT NULL,
+                `ntn` varchar(15) NOT NULL,
+                `strn` varchar(15) NOT NULL,
+                `address` text NOT NULL,
+                `pos_type` varchar(100) NOT NULL,
+                `pos_version` varchar(20) NOT NULL,
+                `ip_address` varchar(45) NOT NULL,
+                `sdc_url` varchar(255) DEFAULT 'http://localhost:8080',
+                `sdc_username` varchar(100) DEFAULT NULL,
+                `sdc_password` varchar(100) DEFAULT NULL,
+                `is_active` tinyint(1) DEFAULT 1,
+                `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `updated_at` datetime DEFAULT NULL,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `unique_store_id` (`store_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+            
+            $this->db->query("CREATE TABLE IF NOT EXISTS `tblfbr_invoice_logs` (
+                `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+                `invoice_id` int(11) NOT NULL,
+                `fbr_invoice_number` varchar(50) DEFAULT NULL,
+                `request_data` text NOT NULL,
+                `response_data` text DEFAULT NULL,
+                `status` enum('pending','confirmed','failed') DEFAULT 'pending',
+                `error_message` text DEFAULT NULL,
+                `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `updated_at` datetime DEFAULT NULL,
+                PRIMARY KEY (`id`),
+                KEY `invoice_id` (`invoice_id`),
+                KEY `status` (`status`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+            
+            $this->db->query("CREATE TABLE IF NOT EXISTS `tblfbr_pct_codes` (
+                `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+                `pct_code` varchar(20) NOT NULL,
+                `description` text NOT NULL,
+                `tax_rate` decimal(5,2) DEFAULT 17.00,
+                `is_active` tinyint(1) DEFAULT 1,
+                `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `unique_pct_code` (`pct_code`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+            
+            // Insert default data
+            $this->db->query("INSERT IGNORE INTO `tblfbr_store_configs` (`store_name`, `store_id`, `ntn`, `strn`, `address`, `pos_type`, `pos_version`, `ip_address`, `sdc_url`, `is_active`, `created_at`) 
+                VALUES ('Default Store', 'STORE001', '0000000000000', 'STRN000000', 'Default Address, Pakistan', 'Perfex CRM', '1.0.0', '127.0.0.1', 'http://localhost:8080', 1, NOW())");
+            
+            return 'Database schema fix applied successfully';
+            
+        } catch (Exception $e) {
+            return 'Database schema fix failed: ' . $e->getMessage();
+        }
+    }
+
+    /**
      * AJAX: Get store config
      */
     public function get_store_config()
