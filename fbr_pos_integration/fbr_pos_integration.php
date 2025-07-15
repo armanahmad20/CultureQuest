@@ -47,22 +47,35 @@ function fbr_pos_activation_hook()
     
     // Drop existing tables if they exist (all possible variations)
     foreach ($table_names as $table_name) {
-        // Standard prefixed table name
-        $prefixed_table = db_prefix() . $table_name;
-        if ($CI->db->table_exists($prefixed_table)) {
-            $CI->dbforge->drop_table($prefixed_table);
+        // All possible table name variations
+        $possible_names = [
+            db_prefix() . $table_name,                    // Standard: tblfbr_store_configs
+            'tbl' . $table_name,                          // Manual: tblfbr_store_configs  
+            'tbltbl' . $table_name,                       // Double: tbltblfbr_store_configs
+            'tbltbltbl' . $table_name,                    // Triple: tbltbltblfbr_store_configs
+            db_prefix() . 'tbl' . $table_name,           // Mixed: tbltblfbr_store_configs
+        ];
+        
+        // Try to drop each possible variation
+        foreach ($possible_names as $table_variation) {
+            try {
+                if ($CI->db->table_exists($table_variation)) {
+                    $CI->dbforge->drop_table($table_variation);
+                }
+            } catch (Exception $e) {
+                // Continue if table doesn't exist or can't be dropped
+                continue;
+            }
         }
         
-        // Double-prefixed table name (in case of prefix bug)
-        $double_prefixed = 'tbl' . $prefixed_table;
-        if ($CI->db->table_exists($double_prefixed)) {
-            $CI->dbforge->drop_table($double_prefixed);
-        }
-        
-        // Raw table name with manual prefix
-        $manual_prefixed = 'tbl' . $table_name;
-        if ($CI->db->table_exists($manual_prefixed)) {
-            $CI->dbforge->drop_table($manual_prefixed);
+        // Also try direct SQL DROP for stubborn tables
+        try {
+            $CI->db->query("DROP TABLE IF EXISTS `{$table_name}`");
+            $CI->db->query("DROP TABLE IF EXISTS `tbl{$table_name}`");
+            $CI->db->query("DROP TABLE IF EXISTS `tbltbl{$table_name}`");
+            $CI->db->query("DROP TABLE IF EXISTS `tbltbltbl{$table_name}`");
+        } catch (Exception $e) {
+            // Continue if queries fail
         }
     }
     

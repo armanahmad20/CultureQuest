@@ -1,8 +1,11 @@
 # FBR POS Integration - Database Troubleshooting Guide
 
-## Problem: "Table 'tbltblfbr_store_configs' already exists"
+## Common Database Errors
 
-This error indicates a table prefix duplication issue. Here are the solutions:
+### Error 1: "Table 'tbltblfbr_store_configs' already exists"
+### Error 2: "Unknown table 'fbr.tbltbltblfbr_store_configs'"
+
+These errors indicate table prefix duplication issues. Here are the solutions:
 
 ### Solution 1: Use the Fixed Module (Recommended)
 
@@ -10,18 +13,30 @@ This error indicates a table prefix duplication issue. Here are the solutions:
 2. **Clean Installation**: The new version automatically handles table cleanup
 3. **Activate Module**: The fixed activation process will work properly
 
-### Solution 2: Manual Database Cleanup
+### Solution 2: Database Cleanup (Quick Fix)
 
-If you still encounter issues, run these SQL commands in your database:
+**Use the provided cleanup script**: Run the `database_cleanup.sql` file in your database:
+
+1. **Access your database** (phpMyAdmin, command line, etc.)
+2. **Import and run** the `database_cleanup.sql` file
+3. **Activate the module** again
+
+**Or run these commands manually**:
 
 ```sql
--- Drop all possible variations of the tables
+-- Drop all possible table variations
+DROP TABLE IF EXISTS `fbr_store_configs`;
 DROP TABLE IF EXISTS `tblfbr_store_configs`;
-DROP TABLE IF EXISTS `tblfbr_invoice_logs`;
-DROP TABLE IF EXISTS `tblfbr_pct_codes`;
 DROP TABLE IF EXISTS `tbltblfbr_store_configs`;
+DROP TABLE IF EXISTS `tbltbltblfbr_store_configs`;
+DROP TABLE IF EXISTS `fbr_invoice_logs`;
+DROP TABLE IF EXISTS `tblfbr_invoice_logs`;
 DROP TABLE IF EXISTS `tbltblfbr_invoice_logs`;
+DROP TABLE IF EXISTS `tbltbltblfbr_invoice_logs`;
+DROP TABLE IF EXISTS `fbr_pct_codes`;
+DROP TABLE IF EXISTS `tblfbr_pct_codes`;
 DROP TABLE IF EXISTS `tbltblfbr_pct_codes`;
+DROP TABLE IF EXISTS `tbltbltblfbr_pct_codes`;
 ```
 
 Then try activating the module again.

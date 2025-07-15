@@ -2,12 +2,18 @@
 -- Run this script in your database if you encounter table creation issues during module activation
 
 -- Drop existing tables if they exist (all possible variations)
+DROP TABLE IF EXISTS `fbr_store_configs`;
+DROP TABLE IF EXISTS `fbr_invoice_logs`;
+DROP TABLE IF EXISTS `fbr_pct_codes`;
 DROP TABLE IF EXISTS `tblfbr_store_configs`;
 DROP TABLE IF EXISTS `tblfbr_invoice_logs`;
 DROP TABLE IF EXISTS `tblfbr_pct_codes`;
 DROP TABLE IF EXISTS `tbltblfbr_store_configs`;
 DROP TABLE IF EXISTS `tbltblfbr_invoice_logs`;
 DROP TABLE IF EXISTS `tbltblfbr_pct_codes`;
+DROP TABLE IF EXISTS `tbltbltblfbr_store_configs`;
+DROP TABLE IF EXISTS `tbltbltblfbr_invoice_logs`;
+DROP TABLE IF EXISTS `tbltbltblfbr_pct_codes`;
 
 -- Create FBR store configurations table
 CREATE TABLE `tblfbr_store_configs` (
