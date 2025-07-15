@@ -118,7 +118,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const { fbrStatus } = req.body;
       
-      const invoice = await storage.updateInvoice(id, { fbrStatus });
+      const invoice = await storage.updateInvoice(id, { fbrStatus } as any);
       if (!invoice) {
         return res.status(404).json({ error: "Invoice not found" });
       }
@@ -173,7 +173,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const success = Math.random() > 0.1; // 90% success rate
       const status = success ? "confirmed" : "failed";
       
-      await storage.updateInvoice(invoiceId, { fbrStatus: status });
+      await storage.updateInvoice(invoiceId, { fbrStatus: status } as any);
       
       await storage.createFbrLog({
         invoiceId,
@@ -221,7 +221,7 @@ async function simulateFbrApiCall(invoiceId: number) {
     const success = Math.random() > 0.15; // 85% success rate
     const status = success ? "confirmed" : "failed";
     
-    await storage.updateInvoice(invoiceId, { fbrStatus: status });
+    await storage.updateInvoice(invoiceId, { fbrStatus: status } as any);
     
     const invoice = await storage.getInvoice(invoiceId);
     if (invoice) {
