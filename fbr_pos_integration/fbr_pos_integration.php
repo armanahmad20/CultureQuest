@@ -38,10 +38,35 @@ function fbr_pos_activation_hook()
     $CI = &get_instance();
     $CI->load->dbforge();
     
+    // Create CodeIgniter sessions table first
+    create_sessions_table();
+    
     // Create tables only if they don't exist - DO NOT DROP EXISTING TABLES
     create_fbr_pct_codes_table();
     create_fbr_store_configs_table();
     create_fbr_invoice_logs_table();
+}
+
+function create_sessions_table()
+{
+    $CI = &get_instance();
+    
+    // Check if table already exists
+    if ($CI->db->table_exists('tblsessions')) {
+        return; // Table exists, don't recreate
+    }
+    
+    // Create sessions table for CodeIgniter
+    $sql = "CREATE TABLE IF NOT EXISTS `tblsessions` (
+        `id` varchar(128) NOT NULL,
+        `ip_address` varchar(45) NOT NULL,
+        `timestamp` int(10) unsigned DEFAULT 0 NOT NULL,
+        `data` blob NOT NULL,
+        PRIMARY KEY (`id`),
+        KEY `tblsessions_timestamp` (`timestamp`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+    
+    $CI->db->query($sql);
 }
 
 function create_fbr_pct_codes_table()
