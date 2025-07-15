@@ -79,11 +79,22 @@ class Fbr_pos_integration_model extends App_Model
             return false;
         }
         
+        // Debug: Check if store_id already exists
+        $existing = $this->db->where('store_id', $data['store_id'])->get('tblfbr_store_configs')->row();
+        if ($existing) {
+            error_log('FBR DEBUG: Store ID already exists: ' . $data['store_id']);
+            log_message('error', 'FBR: Store ID already exists: ' . $data['store_id']);
+            return false;
+        }
+        
         // Debug: Log the SQL being executed
         error_log('FBR DEBUG: Creating store config with data: ' . json_encode($data));
         log_message('debug', 'FBR: Creating store config with data: ' . json_encode($data));
         
+        // Debug: Show the actual SQL query that will be executed
+        $this->db->db_debug = false; // Disable debug to avoid errors
         $result = $this->db->insert('tblfbr_store_configs', $data);
+        $this->db->db_debug = true; // Re-enable debug
         
         // Debug: Log the result and any errors
         if ($result) {
@@ -102,8 +113,13 @@ class Fbr_pos_integration_model extends App_Model
             }
         } else {
             $error = $this->db->error();
-            error_log('FBR DEBUG: Insert failed: ' . $error['message']);
-            log_message('error', 'FBR: Insert failed: ' . $error['message']);
+            error_log('FBR DEBUG: Insert failed: ' . $error['message'] . ' (Code: ' . $error['code'] . ')');
+            log_message('error', 'FBR: Insert failed: ' . $error['message'] . ' (Code: ' . $error['code'] . ')');
+            
+            // Get the last query for debugging
+            $last_query = $this->db->last_query();
+            error_log('FBR DEBUG: Last query: ' . $last_query);
+            log_message('error', 'FBR: Last query: ' . $last_query);
         }
         
         return $result;

@@ -254,7 +254,8 @@ class Fbr_pos_integration extends AdminController
                     'operation' => $config_id ? 'update' : 'create',
                     'result' => 'FAILED',
                     'error' => $error_msg,
-                    'data_attempted' => $data
+                    'data_attempted' => $data,
+                    'config_id' => $config_id
                 ];
                 echo json_encode(['success' => false, 'message' => $error_msg, 'debug' => $debug_info]);
             }
