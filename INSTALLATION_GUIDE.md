@@ -3,12 +3,14 @@
 ## Download and Installation
 
 1. **Download the Module**
-   - Download the `perfex_fbr_pos_v1.0.0.tar.gz` file
-   - Extract it to get the `perfex_fbr_pos` folder
+   - Download the `fbr_pos_integration_v1.0.1.tar.gz` file (latest version with fixes)
+   - Extract it to get the `fbr_pos_integration` folder
 
 2. **Install in Perfex CRM**
-   - Copy the `perfex_fbr_pos` folder to your Perfex CRM `/modules/` directory
-   - The final path should be: `/path/to/perfex/modules/perfex_fbr_pos/`
+   - Extract the downloaded file to get the `fbr_pos_integration` folder
+   - Copy the `fbr_pos_integration` folder to your Perfex CRM `/modules/` directory
+   - The final path should be: `/path/to/perfex/modules/fbr_pos_integration/`
+   - **Important**: The folder name must be exactly `fbr_pos_integration` for proper recognition
 
 3. **Activate the Module**
    - Go to Setup → Modules in your Perfex CRM admin panel
@@ -79,6 +81,27 @@
 - MySQL 5.7 or higher
 - cURL extension enabled
 - Active internet connection for FBR API
+
+## Troubleshooting
+
+### Database Table Issues
+If you encounter "Table already exists" errors during activation:
+1. The module automatically handles table recreation during activation
+2. If issues persist, manually drop the FBR tables from your database:
+   - `DROP TABLE IF EXISTS tbl_fbr_store_configs;`
+   - `DROP TABLE IF EXISTS tbl_fbr_invoice_logs;`
+   - `DROP TABLE IF EXISTS tbl_fbr_pct_codes;`
+3. Then try activating the module again
+
+### Folder Name Issues
+- The module folder **must** be named exactly `fbr_pos_integration`
+- If you named it differently, rename the folder before activation
+
+### Common Issues
+- **Permission Error**: Ensure your web server has write permissions to the modules directory
+- **Database Connection**: Verify your database credentials are correct
+- **PHP Version**: Ensure PHP 7.4 or higher is installed
+- **Missing Extensions**: Verify cURL extension is enabled in PHP
 
 ## Support
 

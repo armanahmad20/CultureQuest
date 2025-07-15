@@ -1,0 +1,424 @@
+/* FBR POS Integration Styles */
+
+.fbr-status-indicator {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.fbr-status-confirmed {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.fbr-status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.fbr-status-failed {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.fbr-invoice-number {
+    font-family: monospace;
+    font-size: 14px;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.fbr-qr-code {
+    text-align: center;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+.fbr-stats-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.fbr-stats-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 24px;
+}
+
+.fbr-stats-card p {
+    margin: 0;
+    opacity: 0.8;
+}
+
+.fbr-log-entry {
+    border-left: 4px solid #007bff;
+    padding-left: 15px;
+    margin-bottom: 15px;
+}
+
+.fbr-log-entry.success {
+    border-left-color: #28a745;
+}
+
+.fbr-log-entry.error {
+    border-left-color: #dc3545;
+}
+
+.fbr-log-entry.warning {
+    border-left-color: #ffc107;
+}
+
+.fbr-config-card {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.fbr-config-card.active {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.fbr-config-card h5 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #495057;
+}
+
+.fbr-config-card.active h5 {
+    color: #155724;
+}
+
+.fbr-pct-code {
+    font-family: monospace;
+    font-size: 14px;
+    font-weight: bold;
+    background-color: #e9ecef;
+    padding: 2px 8px;
+    border-radius: 3px;
+    color: #495057;
+}
+
+.fbr-tax-rate {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.fbr-revenue-display {
+    font-size: 28px;
+    font-weight: bold;
+    color: #28a745;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.fbr-server-status {
+    text-align: center;
+    padding: 20px;
+}
+
+.fbr-server-status.online {
+    color: #28a745;
+}
+
+.fbr-server-status.offline {
+    color: #dc3545;
+}
+
+.fbr-action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.fbr-action-buttons .btn {
+    flex: 1;
+}
+
+.fbr-form-section {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.fbr-form-section h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 10px;
+}
+
+.fbr-required-field {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.fbr-help-text {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+.fbr-settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.fbr-settings-card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.fbr-settings-card h5 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #495057;
+}
+
+.fbr-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.fbr-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.fbr-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.fbr-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .fbr-toggle-slider {
+    background-color: #007bff;
+}
+
+input:checked + .fbr-toggle-slider:before {
+    transform: translateX(26px);
+}
+
+.fbr-loading {
+    text-align: center;
+    padding: 40px;
+    color: #6c757d;
+}
+
+.fbr-loading i {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.fbr-empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #6c757d;
+}
+
+.fbr-empty-state i {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+.fbr-empty-state h4 {
+    margin-bottom: 10px;
+    color: #495057;
+}
+
+.fbr-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 9999;
+}
+
+.fbr-notification.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.fbr-notification.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.fbr-notification.warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.fbr-data-table {
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.fbr-data-table thead th {
+    background-color: #f8f9fa;
+    color: #495057;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+
+.fbr-data-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.fbr-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    border-radius: 12px;
+    white-space: nowrap;
+}
+
+.fbr-badge.primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.fbr-badge.success {
+    background-color: #28a745;
+    color: white;
+}
+
+.fbr-badge.warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.fbr-badge.danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.fbr-badge.info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.fbr-badge.light {
+    background-color: #f8f9fa;
+    color: #495057;
+}
+
+.fbr-badge.dark {
+    background-color: #343a40;
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .fbr-action-buttons {
+        flex-direction: column;
+    }
+    
+    .fbr-settings-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .fbr-stats-card {
+        text-align: center;
+    }
+    
+    .fbr-revenue-display {
+        font-size: 24px;
+    }
+}
+
+/* Animation classes */
+.fbr-fade-in {
+    animation: fbrFadeIn 0.5s ease-in-out;
+}
+
+@keyframes fbrFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fbr-pulse {
+    animation: fbrPulse 2s infinite;
+}
+
+@keyframes fbrPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.fbr-spin {
+    animation: fbrSpin 1s linear infinite;
+}
+
+@keyframes fbrSpin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
