@@ -31,7 +31,7 @@ class Fbr_pos_integration_model extends App_Model
         $stats['total_revenue'] = $revenue_result ? $revenue_result->total_revenue : 0;
         
         // Recent activities
-        $stats['recent_activities'] = $this->db->limit(5)->order_by('created_at', 'DESC')->get(db_prefix() . 'fbr_invoice_logs')->result();
+        $stats['recent_activities'] = $this->db->limit(5)->order_by('created_at', 'DESC')->get('tbltblfbr_invoice_logs')->result();
         
         return $stats;
     }
@@ -41,7 +41,7 @@ class Fbr_pos_integration_model extends App_Model
      */
     public function get_store_configs()
     {
-        return $this->db->order_by('is_active', 'DESC')->order_by('created_at', 'DESC')->get(db_prefix() . 'fbr_store_configs')->result();
+        return $this->db->order_by('is_active', 'DESC')->order_by('created_at', 'DESC')->get('tbltblfbr_store_configs')->result();
     }
 
     /**
@@ -49,7 +49,7 @@ class Fbr_pos_integration_model extends App_Model
      */
     public function get_active_store_config()
     {
-        return $this->db->where('is_active', 1)->get(db_prefix() . 'fbr_store_configs')->row();
+        return $this->db->where('is_active', 1)->get('tbltblfbr_store_configs')->row();
     }
 
     /**
@@ -59,11 +59,11 @@ class Fbr_pos_integration_model extends App_Model
     {
         // If setting as active, deactivate others
         if ($data['is_active'] == 1) {
-            $this->db->update(db_prefix() . 'fbr_store_configs', ['is_active' => 0]);
+            $this->db->update('tbltblfbr_store_configs', ['is_active' => 0]);
         }
         
         $data['created_at'] = date('Y-m-d H:i:s');
-        return $this->db->insert(db_prefix() . 'fbr_store_configs', $data);
+        return $this->db->insert('tbltblfbr_store_configs', $data);
     }
 
     /**
